@@ -2,7 +2,7 @@ const { executeQuery } = require("../database/config");
 
 // Craete a Task
 const createTask = async (req, res) => {
-    const { title, description, dateTime, priority, id, isCompleted, completedDate } = req.body;
+    const { title, description, dateTime, priority, id, isCompleted, completedDate } = req.body.requestBody;
     const query = `
     INSERT INTO tasks (id, title, description, dateTime, priority, isCompleted, completedDate)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
