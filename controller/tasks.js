@@ -1,5 +1,16 @@
 const { executeQuery } = require("../database/config");
 
+// Get Uncompleted Tasks
+const uncompletedTasks = async (req, res) => {
+    const query = `SELECT * FROM tasks WHERE isCompleted = false`;
+    try {
+        const result = await executeQuery(query);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Craete a Task
 const createTask = async (req, res) => {
     const { title, description, dateTime, priority, id, isCompleted, completedDate } = req.body.requestBody;
@@ -85,5 +96,6 @@ module.exports = {
     updateTask,
     deleteTask,
     completeTask,
-    retakeTask
+    retakeTask,
+    uncompletedTasks
 }

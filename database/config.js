@@ -20,11 +20,16 @@ const connectToDatabase = async () => {
     }
 };
 
-// Function to execute a SQL query with parameters
+// Function to execute a SQL query
 const executeQuery = async (query, params) => {
     try {
         const client = await pool.connect();
-        const result = await client.query(query, params); // Pass the parameters here
+        let result;
+        if (params) {
+            result = await client.query(query, params); // Pass the parameters here if they exist
+        } else {
+            result = await client.query(query); // Execute query without parameters
+        }
         client.release();
         return result;
     } catch (err) {
