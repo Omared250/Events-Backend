@@ -1,8 +1,8 @@
 const { executeQuery } = require("../database/config");
 
 // Get Uncompleted Tasks
-const uncompletedTasks = async (req, res) => {
-    const query = `SELECT * FROM tasks WHERE isCompleted = false`;
+const getUncompletedTasks = async (req, res) => {
+    const query = `SELECT * FROM tasks WHERE "isCompleted" = false`;
     try {
         const result = await executeQuery(query);
         res.status(200).json(result.rows);
@@ -11,11 +11,23 @@ const uncompletedTasks = async (req, res) => {
     }
 };
 
+// Get completed tasks
+const getCompletedTasks = async (req, res) => {
+    const query = `SELECT * FROM tasks WHERE "isCompleted" = true`;
+    try {
+        const result = await executeQuery(query);
+        res.status(200).json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+        throw err;
+    }
+};
+
 // Craete a Task
 const createTask = async (req, res) => {
-    const { title, description, dateTime, priority, id, isCompleted, completedDate } = req.body.requestBody;
+    const { title, description, dateTime, priority, id, isCompleted, completedDate } = req.body;
     const query = `
-    INSERT INTO tasks (id, title, description, dateTime, priority, isCompleted, completedDate)
+    INSERT INTO tasks (id, title, description, "dateTime", priority, "isCompleted", "completedDate")
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING *
   `;
@@ -32,9 +44,9 @@ const createTask = async (req, res) => {
 // Update a Task
 const updateTask = async (req, res) => {
     const { id } = req.params;
-    const { title, description, dateTime, priority } = req.body;
+    const { title, description, dateTime, priority } = req.body.requestBody;
 
-    const query = `UPDATE tasks SET title = $2, description = $3, dateTime = $4, priority = $5 WHERE id = $1 RETURNING *`;
+    const query = `UPDATE tasks SET title = $2, description = $3, "dateTime" = $4, priority = $5 WHERE id = $1 RETURNING *`;
     const params = [id, title, description, dateTime, priority];
 
     try {
@@ -65,7 +77,7 @@ const completeTask = async (req, res) => {
     const { id } = req.params;
     const completedDate = new Date();
 
-    const query = `UPDATE tasks SET isCompleted = true, completedDate = $2 WHERE id = $1 RETURNING *`;
+    const query = `UPDATE tasks SET "isCompleted" = true, "completedDate" = $2 WHERE id = $1 RETURNING *`;
     const params = [id, completedDate];
 
     try {
@@ -76,11 +88,11 @@ const completeTask = async (req, res) => {
     }
 };
 
-// Complete a task
+// retake a task
 const retakeTask = async (req, res) => {
     const { id } = req.params;
 
-    const query = `UPDATE tasks SET isCompleted = false, completedDate = null WHERE id = $1 RETURNING *`;
+    const query = `UPDATE tasks SET "isCompleted" = false, "completedDate" = null WHERE id = $1 RETURNING *`;
     const params = [id];
 
     try {
@@ -97,5 +109,6 @@ module.exports = {
     deleteTask,
     completeTask,
     retakeTask,
-    uncompletedTasks
+    getUncompletedTasks,
+    getCompletedTasks
 }

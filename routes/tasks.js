@@ -1,9 +1,12 @@
 const { Router } = require('express');
-const { createTask, updateTask, deleteTask, completeTask, retakeTask, uncompletedTasks } = require('../controller/tasks');
+const { createTask, updateTask, deleteTask, completeTask, retakeTask, getUncompletedTasks, getCompletedTasks } = require('../controller/tasks');
 const router = Router();
 
 // GetUncompletedTasks
-router.get('/uncompleted', uncompletedTasks);
+router.get('/uncompleted', getUncompletedTasks);
+
+// GetCcompletedTasks
+router.get('/completed', getCompletedTasks);
 
 // Create Task
 router.post('/createTask', createTask);
