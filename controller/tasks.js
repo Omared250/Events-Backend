@@ -1,4 +1,25 @@
 const { executeQuery } = require("../database/config");
+const logger = require("../winston-config");
+
+const handleError = (err, res, action) => {
+    const statusCode = err.response ? err.response.status : 500;
+    const message = err.response && err.response.data ? err.response.data.msg : `An unexpected error occurred with ${action}`;
+    const stack = err.stack;
+    const errorDetails = {
+        action,
+        statusCode,
+        message,
+        stack,
+        url: err.config ? err.config.url : undefined,
+    };
+
+    logger.error(errorDetails);
+
+    res.status(statusCode).json({
+        ok: false,
+        msg: message
+    });
+};
 
 // Get Uncompleted Tasks
 const getUncompletedTasks = async (req, res) => {
@@ -7,9 +28,12 @@ const getUncompletedTasks = async (req, res) => {
     const params = [userId];
     try {
         const result = await executeQuery(query, params);
+        logger.info(`Uncompleted tasks retrieved for user ${userId}`);
         res.status(200).json(result.rows);
     } catch (error) {
+        handleError(err, res, 'getUncompletedTasks');
         res.status(500).json({ error: error.message });
+        throw err;
     }
 };
 
@@ -20,8 +44,10 @@ const getCompletedTasks = async (req, res) => {
     const params = [userId];
     try {
         const result = await executeQuery(query, params);
+        logger.info(`Completed tasks retrieved for user ${userId}`);
         res.status(200).json(result.rows);
     } catch (err) {
+        handleError(err, res, 'getCompletedTasks');
         res.status(500).json({ error: err.message });
         throw err;
     }
@@ -39,9 +65,12 @@ const createTask = async (req, res) => {
 
     try {
         const result = await executeQuery(query, params);
+        logger.info(`Task created with ID ${id} for user ${userId}`);
         res.status(201).json(result.rows[0]);
     } catch (error) {
+        handleError(err, res, 'createTask');
         res.status(500).json({ error: error.message });
+        throw err;
     }
 };
 
@@ -55,9 +84,12 @@ const updateTask = async (req, res) => {
 
     try {
         const result = await executeQuery(query, params);
+        logger.info(`Task with ID ${id} updated`);
         res.status(200).json(result.rows[0]);
     } catch (error) {
+        handleError(err, res, 'updateTask');
         res.status(500).json({ error: error.message });
+        throw err;
     }
 };
 
@@ -69,10 +101,13 @@ const deleteTask = async (req, res) => {
     const params = [id];
 
     try {
-        const result = await executeQuery(query, params);
+        await executeQuery(query, params);
+        logger.info(`Task with ID ${id} deleted`);
         res.status(204).send();
     } catch (error) {
+        handleError(err, res, 'deleteTask');
         res.status(500).json({ error: error.message });
+        throw err;
     }
 };
 
@@ -86,9 +121,12 @@ const completeTask = async (req, res) => {
 
     try {
         const result = await executeQuery(query, params);
+        logger.info(`Task with ID ${id} marked as completed`);
         res.status(200).json(result.rows[0]);
     } catch (error) {
+        handleError(err, res, 'completeTask');
         res.status(500).json({ error: error.message });
+        throw err;
     }
 };
 
@@ -101,9 +139,12 @@ const retakeTask = async (req, res) => {
 
     try {
         const result = await executeQuery(query, params);
+        logger.info(`Task with ID ${id} marked as not completed`);
         res.status(200).json(result.rows[0]);
     } catch (error) {
+        handleError(err, res, 'retakeTask');
         res.status(500).json({ error: error.message });
+        throw err;
     }
 };
 
