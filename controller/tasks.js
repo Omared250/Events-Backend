@@ -2,9 +2,11 @@ const { executeQuery } = require("../database/config");
 
 // Get Uncompleted Tasks
 const getUncompletedTasks = async (req, res) => {
-    const query = `SELECT * FROM tasks WHERE "isCompleted" = false`;
+    const { userId } = req.query;
+    const query = `SELECT * FROM tasks WHERE "userId" = $1 AND "isCompleted" = false`;
+    const params = [userId];
     try {
-        const result = await executeQuery(query);
+        const result = await executeQuery(query, params);
         res.status(200).json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -13,9 +15,11 @@ const getUncompletedTasks = async (req, res) => {
 
 // Get completed tasks
 const getCompletedTasks = async (req, res) => {
-    const query = `SELECT * FROM tasks WHERE "isCompleted" = true`;
+    const { userId } = req.query;
+    const query = `SELECT * FROM tasks WHERE "userId" = $1 AND "isCompleted" = true`;
+    const params = [userId];
     try {
-        const result = await executeQuery(query);
+        const result = await executeQuery(query, params);
         res.status(200).json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -25,13 +29,13 @@ const getCompletedTasks = async (req, res) => {
 
 // Craete a Task
 const createTask = async (req, res) => {
-    const { title, description, dateTime, priority, id, isCompleted, completedDate } = req.body;
+    const { title, description, dateTime, priority, id, isCompleted, completedDate, userId } = req.body;
     const query = `
-    INSERT INTO tasks (id, title, description, "dateTime", priority, "isCompleted", "completedDate")
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO tasks (id, "userId", title, description, "dateTime", priority, "isCompleted", "completedDate")
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *
   `;
-    const params = [id, title, description, dateTime, priority, isCompleted, completedDate];
+    const params = [id, userId, title, description, dateTime, priority, isCompleted, completedDate];
 
     try {
         const result = await executeQuery(query, params);
