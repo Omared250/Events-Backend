@@ -21,11 +21,11 @@ const connectToDatabase = async () => {
 };
 
 // Function to execute a SQL query
-const executeQuery = async (query, params) => {
+const executeQuery = async (query, params, delay) => {
     try {
         const client = await pool.connect();
         // Hardcoded delay using pg_sleep, for example, 5 seconds
-        await client.query('SELECT pg_sleep(2)');
+        await client.query(`SELECT pg_sleep(${delay})`);
         let result;
         if (params) {
             result = await client.query(query, params); // Pass the parameters here if they exist

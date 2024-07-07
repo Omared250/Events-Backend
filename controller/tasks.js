@@ -1,6 +1,9 @@
 const { executeQuery } = require("../database/config");
 const logger = require("../winston-config");
 
+// Introduce a sleep function to create a delay
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 const handleError = (err, res, action) => {
     const statusCode = err.response ? err.response.status : 500;
     const message = err.response && err.response.data ? err.response.data.msg : `An unexpected error occurred with ${action}`;
@@ -27,7 +30,7 @@ const getUncompletedTasks = async (req, res) => {
     const query = `SELECT * FROM tasks WHERE "userId" = $1 AND "isCompleted" = false`;
     const params = [userId];
     try {
-        const result = await executeQuery(query, params);
+        const result = await executeQuery(query, params, 0);
         logger.info(`Uncompleted tasks retrieved for user ${userId}`);
         res.status(200).json(result.rows);
     } catch (error) {
@@ -43,7 +46,7 @@ const getCompletedTasks = async (req, res) => {
     const query = `SELECT * FROM tasks WHERE "userId" = $1 AND "isCompleted" = true`;
     const params = [userId];
     try {
-        const result = await executeQuery(query, params);
+        const result = await executeQuery(query, params, 1);
         logger.info(`Completed tasks retrieved for user ${userId}`);
         res.status(200).json(result.rows);
     } catch (err) {
@@ -64,7 +67,8 @@ const createTask = async (req, res) => {
     const params = [id, userId, title, description, dateTime, priority, isCompleted, completedDate];
 
     try {
-        const result = await executeQuery(query, params);
+        const result = await executeQuery(query, params, 1);
+        await sleep(1000);
         logger.info(`Task created with ID ${id} for user ${userId}`);
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -83,7 +87,7 @@ const updateTask = async (req, res) => {
     const params = [id, title, description, dateTime, priority];
 
     try {
-        const result = await executeQuery(query, params);
+        const result = await executeQuery(query, params, 0.7);
         logger.info(`Task with ID ${id} updated`);
         res.status(200).json(result.rows[0]);
     } catch (error) {
@@ -101,7 +105,7 @@ const deleteTask = async (req, res) => {
     const params = [id];
 
     try {
-        await executeQuery(query, params);
+        await executeQuery(query, params, 0.8);
         logger.info(`Task with ID ${id} deleted`);
         res.status(204).send();
     } catch (error) {
@@ -120,7 +124,7 @@ const completeTask = async (req, res) => {
     const params = [id, completedDate];
 
     try {
-        const result = await executeQuery(query, params);
+        const result = await executeQuery(query, params, 0.9);
         logger.info(`Task with ID ${id} marked as completed`);
         res.status(200).json(result.rows[0]);
     } catch (error) {
@@ -138,7 +142,7 @@ const retakeTask = async (req, res) => {
     const params = [id];
 
     try {
-        const result = await executeQuery(query, params);
+        const result = await executeQuery(query, params, 0.9);
         logger.info(`Task with ID ${id} marked as not completed`);
         res.status(200).json(result.rows[0]);
     } catch (error) {
