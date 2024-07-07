@@ -27,7 +27,7 @@ const getUncompletedTasks = async (req, res) => {
     const query = `SELECT * FROM tasks WHERE "userId" = $1 AND "isCompleted" = false`;
     const params = [userId];
     try {
-        const result = await executeQuery(query, params, 0);
+        const result = await executeQuery(query, params);
         logger.info(`Uncompleted tasks retrieved for user ${userId}`);
         res.status(200).json(result.rows);
     } catch (error) {
@@ -43,7 +43,7 @@ const getCompletedTasks = async (req, res) => {
     const query = `SELECT * FROM tasks WHERE "userId" = $1 AND "isCompleted" = true`;
     const params = [userId];
     try {
-        const result = await executeQuery(query, params, 1);
+        const result = await executeQuery(query, params);
         logger.info(`Completed tasks retrieved for user ${userId}`);
         res.status(200).json(result.rows);
     } catch (err) {
