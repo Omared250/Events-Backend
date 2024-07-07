@@ -106,6 +106,7 @@ const deleteTask = async (req, res) => {
 
     try {
         await executeQuery(query, params, 0.8);
+        await sleep(1000);
         logger.info(`Task with ID ${id} deleted`);
         res.status(204).send();
     } catch (error) {
